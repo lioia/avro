@@ -45,30 +45,30 @@
         <artifactId>avro-maven-plugin</artifactId>
          <version>${project.version}</version>
         <executions>
-          <execution>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>schema</goal>
-              <goal>protocol</goal>
-              <goal>idl-protocol</goal>
-            </goals>
-            <configuration>
-              <stringType>String</stringType>
-              <testSourceDirectory>${project.basedir}/src/test/resources/avro</testSourceDirectory>
-              <testOutputDirectory>${project.build.directory}/generated-test-sources/java</testOutputDirectory>
-              <enableDecimalLogicalType>true</enableDecimalLogicalType>
-              <customLogicalTypeFactories>
-                <logicalTypeFactory>org.apache.avro.codegentest.FixedSizeStringFactory</logicalTypeFactory>
-                <logicalTypeFactory>org.apache.avro.codegentest.CustomEnumLogicalTypeFactory</logicalTypeFactory>
-              </customLogicalTypeFactories>
-              <customConversions>
-                <conversion>org.apache.avro.codegentest.CustomDecimalConversion</conversion>
-                <conversion>org.apache.avro.codegentest.FixedSizeStringConversion</conversion>
-                <conversion>org.apache.avro.Conversions$UUIDConversion</conversion>
-                <conversion>org.apache.avro.codegentest.CustomEnumConversion</conversion>
-              </customConversions>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <phase>generate-test-sources</phase>-->
+<!--            <goals>-->
+<!--              <goal>schema</goal>-->
+<!--              <goal>protocol</goal>-->
+<!--              <goal>idl-protocol</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <stringType>String</stringType>-->
+<!--              <testSourceDirectory>${project.basedir}/src/test/resources/avro</testSourceDirectory>-->
+<!--              <testOutputDirectory>${project.build.directory}/generated-test-sources/java</testOutputDirectory>-->
+<!--              <enableDecimalLogicalType>true</enableDecimalLogicalType>-->
+<!--              <customLogicalTypeFactories>-->
+<!--                <logicalTypeFactory>org.apache.avro.codegentest.FixedSizeStringFactory</logicalTypeFactory>-->
+<!--                <logicalTypeFactory>org.apache.avro.codegentest.CustomEnumLogicalTypeFactory</logicalTypeFactory>-->
+<!--              </customLogicalTypeFactories>-->
+<!--              <customConversions>-->
+<!--                <conversion>org.apache.avro.codegentest.CustomDecimalConversion</conversion>-->
+<!--                <conversion>org.apache.avro.codegentest.FixedSizeStringConversion</conversion>-->
+<!--                <conversion>org.apache.avro.Conversions$UUIDConversion</conversion>-->
+<!--                <conversion>org.apache.avro.codegentest.CustomEnumConversion</conversion>-->
+<!--              </customConversions>-->
+<!--            </configuration>-->
+<!--          </execution>-->
         </executions>
          <dependencies>
            <dependency>
@@ -82,18 +82,18 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.basedir}/target/generated-test-sources/java</source>
-              </sources>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>add-test-source</id>-->
+<!--            <phase>generate-test-sources</phase>-->
+<!--            <goals>-->
+<!--              <goal>add-test-source</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <sources>-->
+<!--                <source>${project.basedir}/target/generated-test-sources/java</source>-->
+<!--              </sources>-->
+<!--            </configuration>-->
+<!--          </execution>-->
         </executions>
       </plugin>
     </plugins>
