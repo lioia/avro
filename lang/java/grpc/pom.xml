@@ -99,8 +99,8 @@
             </goals>
             <configuration>
               <stringType>String</stringType>
-              <testSourceDirectory>${project.basedir}/src/test/avro</testSourceDirectory>
-              <testOutputDirectory>${project.build.directory}/generated-test-sources/java</testOutputDirectory>
+<!--              <testSourceDirectory>${project.basedir}/src/test/avro</testSourceDirectory>-->
+<!--              <testOutputDirectory>${project.build.directory}/generated-test-sources/java</testOutputDirectory>-->
             </configuration>
           </execution>
         </executions>
