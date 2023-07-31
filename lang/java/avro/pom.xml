@@ -289,6 +289,74 @@
         </plugins>
       </build>
     </profile>
+
+    <profile>
+      <id>pit</id>
+      <activation>
+        <property>
+          <name>pit</name>
+        </property>
+      </activation>
+      <properties>
+        <pitest.version>1.10.3</pitest.version>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.pitest</groupId>
+          <artifactId>pitest-maven</artifactId>
+          <version>${pitest.version}</version>
+          <type>maven-plugin</type>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-banned-dependencies</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <bannedDependencies>
+                      <includes>
+                        <include>com.google.code.findbugs:jsr305</include>
+                      </includes>
+                    </bannedDependencies>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>${pitest.version}</version>
+            <configuration>
+              <targetClasses>
+                <param>org.apache.avro.Resolver</param>
+              </targetClasses>
+              <targetTests>
+                <param>org.apache.avro.TestResolver</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>PIT</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <dependencies>
