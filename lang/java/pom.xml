@@ -68,6 +68,12 @@
     <javacc-plugin.version>3.0.3</javacc-plugin.version>
     <javacc.version>7.0.12</javacc.version>
     <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
+
+    <!-- JaCoCo integration -->
+    <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ../jacoco-reports/target/site/jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <modules>
@@ -87,6 +93,7 @@
     <module>grpc</module>
     <module>integration-test</module>
     <module>perf</module>
+    <module>jacoco-reports</module>
   </modules>
 
   <build>
@@ -187,7 +194,7 @@
                  rather than the console. -->
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
-            <argLine>-Xmx1000m</argLine>
+<!--            <argLine>-Xmx1000m</argLine>-->
           </configuration>
         </plugin>
         <plugin>
@@ -490,6 +497,32 @@
       <properties>
         <hadoop.version>2.10.1</hadoop.version>
       </properties>
+    </profile>
+
+    <!-- JaCoCo Profile -->
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <property>
+          <name>jacoco</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
