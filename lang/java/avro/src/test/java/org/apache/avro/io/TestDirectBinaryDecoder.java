@@ -23,7 +23,6 @@ public class TestDirectBinaryDecoder {
   public static class TestReadBoolean {
     private final ExpectedResult<Object> expected;
     private final InputStream input;
-    private BinaryDecoder decoder;
 
 
     public TestReadBoolean(TestParameters parameters) {
@@ -50,7 +49,7 @@ public class TestDirectBinaryDecoder {
     @Test
     public void readBoolean() {
       try {
-        decoder = new DirectBinaryDecoder(input);
+        BinaryDecoder decoder = new DirectBinaryDecoder(input);
         boolean result = decoder.readBoolean();
         Assert.assertEquals(expected.getResult(), result);
       } catch (Exception e) {
