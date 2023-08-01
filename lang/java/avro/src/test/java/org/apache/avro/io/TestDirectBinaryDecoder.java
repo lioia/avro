@@ -95,4 +95,45 @@ public class TestDirectBinaryDecoder {
       }
     }
   }
+
+  @RunWith(Parameterized.class)
+  public static class TestReadLong {
+    private final ExpectedResult<Object> expected;
+    private final InputStream input;
+
+    public TestReadLong(TestParameters parameters) {
+      this.expected = parameters.expected();
+      this.input = parameters.input();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParameters> getParameters() {
+      byte[] invalidValue = new byte[10];
+      Arrays.fill(invalidValue, (byte) 0xFF);
+      return Arrays.asList(
+        new TestParameters(new ExpectedResult<>(null, Exception.class), null),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
+        new TestParameters(new ExpectedResult<>(0L, null), new ByteArrayInputStream(new byte[]{0})),
+        new TestParameters(new ExpectedResult<>(-1L, null), new ByteArrayInputStream(new byte[]{1})),
+        new TestParameters(new ExpectedResult<>(1L, null), new ByteArrayInputStream(new byte[]{2})),
+        new TestParameters(new ExpectedResult<>(-2L, null), new ByteArrayInputStream(new byte[]{3})),
+        new TestParameters(new ExpectedResult<>(2L, null), new ByteArrayInputStream(new byte[]{4})),
+        new TestParameters(new ExpectedResult<>(-64L, null), new ByteArrayInputStream(new byte[]{127})),
+        new TestParameters(new ExpectedResult<>(64L, null), new ByteArrayInputStream(new byte[]{-128, 1})),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(invalidValue))
+      );
+    }
+
+    @Test
+    public void readLong() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(input);
+        long value = decoder.readLong();
+        Assert.assertEquals(expected.getResult(), value);
+      } catch (Exception e) {
+        Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  }
 }
