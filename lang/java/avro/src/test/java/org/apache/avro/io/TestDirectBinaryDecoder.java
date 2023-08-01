@@ -68,6 +68,7 @@ public class TestDirectBinaryDecoder {
 
     @Parameterized.Parameters
     public static Collection<TestParameters> getParameters() {
+      byte[] invalidValue = new byte[]{(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
       return Arrays.asList(
         new TestParameters(new ExpectedResult<>(null, Exception.class), null),
         new TestParameters(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
@@ -78,7 +79,8 @@ public class TestDirectBinaryDecoder {
         new TestParameters(new ExpectedResult<>(-2, null), new ByteArrayInputStream(new byte[]{3})),
         new TestParameters(new ExpectedResult<>(2, null), new ByteArrayInputStream(new byte[]{4})),
         new TestParameters(new ExpectedResult<>(-64, null), new ByteArrayInputStream(new byte[]{127})),
-        new TestParameters(new ExpectedResult<>(64, null), new ByteArrayInputStream(new byte[]{-128, 1}))
+        new TestParameters(new ExpectedResult<>(64, null), new ByteArrayInputStream(new byte[]{-128, 1})),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(invalidValue))
       );
     }
 
