@@ -2,16 +2,16 @@ package org.apache.avro.utils;
 
 import java.io.InputStream;
 
-public class TestParameters {
-  private final ExpectedResult<Object> expected;
+public class TestParameters<T> {
+  private final ExpectedResult<T> expected;
   private final InputStream input;
 
-  public TestParameters(ExpectedResult<Object> expected, InputStream input) {
+  public TestParameters(ExpectedResult<T> expected, InputStream input) {
     this.expected = expected;
     this.input = input;
   }
 
-  public ExpectedResult<Object> expected() {
+  public ExpectedResult<T> expected() {
     return expected;
   }
 
