@@ -338,10 +338,11 @@
             <version>${pitest.version}</version>
             <configuration>
               <targetClasses>
-                <param>org.apache.avro.Resolver</param>
+                <param>org.apache.avro.io.DirectBinaryDecoder</param>
+                <param>org.apache.avro.io.DirectBinaryDecoder$ByteReader</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.avro.TestResolver</param>
+                <param>org.apache.avro.io.TestDirectBinaryDecoder</param>
               </targetTests>
             </configuration>
             <executions>
