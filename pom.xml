@@ -65,10 +65,18 @@
 
     <!-- Pin output timestamp to make the Java build reproducible -->
     <project.build.outputTimestamp>10</project.build.outputTimestamp>
+
+
+    <!-- JaCoCo integration -->
+    <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      {project.baseDir}/lang/java/jacoco-reports/target/site/jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <modules>
     <module>lang/java</module>
+    <module>lang/java/jacoco-reports</module>
   </modules>
 
   <scm>
@@ -526,6 +534,32 @@
         </plugins>
       </build>
     </profile>
-  </profiles>
 
+
+    <!-- JaCoCo Profile -->
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <property>
+          <name>jacoco</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
