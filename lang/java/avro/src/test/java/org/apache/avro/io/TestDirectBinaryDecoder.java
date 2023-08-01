@@ -1,11 +1,9 @@
 package org.apache.avro.io;
 
-import jdk.internal.org.jline.utils.Log;
 import org.apache.avro.utils.ExpectedResult;
 import org.apache.avro.utils.TestParameters;
 import org.apache.avro.utils.ThrowInputStream;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -52,6 +50,44 @@ public class TestDirectBinaryDecoder {
         BinaryDecoder decoder = new DirectBinaryDecoder(input);
         boolean result = decoder.readBoolean();
         Assert.assertEquals(expected.getResult(), result);
+      } catch (Exception e) {
+        Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class TestReadInt {
+    private final ExpectedResult<Object> expected;
+    private final InputStream input;
+
+    public TestReadInt(TestParameters parameters) {
+      this.expected = parameters.expected();
+      this.input = parameters.input();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParameters> getParameters() {
+      return Arrays.asList(
+        new TestParameters(new ExpectedResult<>(null, Exception.class), null),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
+        new TestParameters(new ExpectedResult<>(0, null), new ByteArrayInputStream(new byte[]{0})),
+        new TestParameters(new ExpectedResult<>(-1, null), new ByteArrayInputStream(new byte[]{1})),
+        new TestParameters(new ExpectedResult<>(1, null), new ByteArrayInputStream(new byte[]{2})),
+        new TestParameters(new ExpectedResult<>(-2, null), new ByteArrayInputStream(new byte[]{3})),
+        new TestParameters(new ExpectedResult<>(2, null), new ByteArrayInputStream(new byte[]{4})),
+        new TestParameters(new ExpectedResult<>(-64, null), new ByteArrayInputStream(new byte[]{127})),
+        new TestParameters(new ExpectedResult<>(64, null), new ByteArrayInputStream(new byte[]{-128, 1}))
+      );
+    }
+
+    @Test
+    public void readInt() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(input);
+        int value = decoder.readInt();
+        Assert.assertEquals(expected.getResult(), value);
       } catch (Exception e) {
         Assert.assertNotNull(this.expected.getException());
       }
