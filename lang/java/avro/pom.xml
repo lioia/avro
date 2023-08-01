@@ -339,6 +339,7 @@
             <configuration>
               <targetClasses>
                 <param>org.apache.avro.io.DirectBinaryDecoder</param>
+                <param>org.apache.avro.io.DirectBinaryDecoder$ByteReader</param>
               </targetClasses>
               <targetTests>
                 <param>org.apache.avro.io.TestDirectBinaryDecoder</param>

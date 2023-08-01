@@ -1,5 +1,6 @@
 package org.apache.avro.io;
 
+import org.apache.avro.util.ByteBufferInputStream;
 import org.apache.avro.utils.ExpectedResult;
 import org.apache.avro.utils.TestParameters;
 import org.apache.avro.utils.ThrowInputStream;
@@ -9,11 +10,9 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Random;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 @RunWith(Enclosed.class)
 public class TestDirectBinaryDecoder {
@@ -202,6 +201,81 @@ public class TestDirectBinaryDecoder {
         Assert.assertEquals(expected.getResult(), result);
       } catch (Exception e) {
         Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  }
+
+
+  @RunWith(Parameterized.class)
+  public static class TestReadBytes {
+    private final ExpectedResult<ByteBuffer> expected;
+    private final ByteBuffer old;
+    private final InputStream input;
+
+    public TestReadBytes(TestParametersReadBytes parameters) {
+      this.expected = parameters.expected;
+      this.old = parameters.old;
+      byte[] bytes = new byte[parameters.length.length + parameters.bytes.length];
+      System.arraycopy(parameters.length, 0, bytes, 0, parameters.length.length);
+      System.arraycopy(parameters.bytes, 0, bytes, parameters.length.length, parameters.bytes.length);
+      input = new ByteArrayInputStream(bytes);
+    }
+
+    private static byte[] fromLong(long value) throws IOException {
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
+      encoder.writeLong(value);
+      return output.toByteArray();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParametersReadBytes> getParameters() throws IOException {
+      byte[] length0 = new byte[]{0};
+      byte[] lengthMinus1 = new byte[]{1};
+      byte[] length1 = new byte[]{2};
+      byte[] zeroElement = new byte[0];
+      ByteBuffer zeroElementBuffer = ByteBuffer.wrap(zeroElement);
+      byte[] oneElement = new byte[]{1};
+      ByteBuffer oneElementBuffer = ByteBuffer.wrap(oneElement);
+      byte[] twoElement = new byte[]{1, 2};
+      ByteBuffer arbitraryBuffer = ByteBuffer.wrap(twoElement);
+      byte[] maxLength = fromLong(BinaryDecoder.MAX_ARRAY_SIZE);
+      byte[] maxLengthPlus1 = fromLong(BinaryDecoder.MAX_ARRAY_SIZE + 1);
+      return Arrays.asList(
+        new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), null, lengthMinus1, zeroElement),
+        new TestParametersReadBytes(new ExpectedResult<>(zeroElementBuffer, null), zeroElementBuffer, length0, zeroElement),
+//        new TestParametersReadBytes(new ExpectedResult<>(zeroElementBuffer, null), arbitraryBuffer, length0, oneElement),
+        new TestParametersReadBytes(new ExpectedResult<>(oneElementBuffer, null), zeroElementBuffer, length1, oneElement),
+        new TestParametersReadBytes(new ExpectedResult<>(zeroElementBuffer, Exception.class), zeroElementBuffer, length1, zeroElement),
+        new TestParametersReadBytes(new ExpectedResult<>(oneElementBuffer, null), null, length1, twoElement),
+        // Coverage Improvements
+        new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), null, maxLength, zeroElement),
+        new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), zeroElementBuffer, maxLengthPlus1, oneElement)
+      );
+    }
+
+    @Test
+    public void readBytes() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(input);
+        ByteBuffer result = decoder.readBytes(old);
+        Assert.assertArrayEquals(expected.getResult().array(), result.array());
+      } catch (Exception e) {
+        Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  
+    public static class TestParametersReadBytes {
+      private final ExpectedResult<ByteBuffer> expected;
+      private final ByteBuffer old;
+      private final byte[] length;
+      private final byte[] bytes;
+
+      public TestParametersReadBytes(ExpectedResult<ByteBuffer> expected, ByteBuffer old, byte[] length, byte[] bytes) {
+        this.expected = expected;
+        this.old = old;
+        this.length = length;
+        this.bytes = bytes;
       }
     }
   }
