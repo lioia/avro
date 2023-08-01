@@ -10,7 +10,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
@@ -21,7 +23,6 @@ public class TestDirectBinaryDecoder {
   public static class TestReadBoolean {
     private final ExpectedResult<Object> expected;
     private final InputStream input;
-
 
     public TestReadBoolean(TestParameters parameters) {
       this.expected = parameters.expected();
@@ -131,6 +132,41 @@ public class TestDirectBinaryDecoder {
         DirectBinaryDecoder decoder = new DirectBinaryDecoder(input);
         long value = decoder.readLong();
         Assert.assertEquals(expected.getResult(), value);
+      } catch (Exception e) {
+        Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class TestReadFloat {
+    private final ExpectedResult<Object> expected;
+    private final InputStream input;
+
+    public TestReadFloat(TestParameters parameters) {
+      this.expected = parameters.expected();
+      this.input = parameters.input();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParameters> getParameters() {
+      // 3.14 in IEEE 754 little endian
+      byte[] pi = new byte[]{(byte) 0xc3, (byte) 0xf5, (byte) 0x48, (byte) 0x40};
+      return Arrays.asList(
+        new TestParameters(new ExpectedResult<>(null, Exception.class), null),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
+        new TestParameters(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[]{4, 2, 0})),
+        new TestParameters(new ExpectedResult<>(3.14f, null), new ByteArrayInputStream(pi))
+      );
+    }
+
+    @Test
+    public void readFloat() {
+      try {
+        BinaryDecoder decoder = new DirectBinaryDecoder(input);
+        float result = decoder.readFloat();
+        Assert.assertEquals(expected.getResult(), result);
       } catch (Exception e) {
         Assert.assertNotNull(this.expected.getException());
       }
