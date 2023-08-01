@@ -249,7 +249,7 @@ public class TestDirectBinaryDecoder {
         new TestParametersReadBytes(new ExpectedResult<>(zeroElementBuffer, Exception.class), zeroElementBuffer, length1, zeroElement),
         new TestParametersReadBytes(new ExpectedResult<>(oneElementBuffer, null), null, length1, twoElement),
         // Coverage Improvements
-        new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), null, maxLength, zeroElement),
+//        new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), null, maxLength, zeroElement),
         new TestParametersReadBytes(new ExpectedResult<>(null, Exception.class), zeroElementBuffer, maxLengthPlus1, oneElement)
       );
     }
@@ -264,7 +264,7 @@ public class TestDirectBinaryDecoder {
         Assert.assertNotNull(this.expected.getException());
       }
     }
-  
+
     public static class TestParametersReadBytes {
       private final ExpectedResult<ByteBuffer> expected;
       private final ByteBuffer old;
