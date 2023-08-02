@@ -9,6 +9,7 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -18,82 +19,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(Enclosed.class)
 public class TestDirectBinaryDecoder {
-  @Mock
-  private InputStream throwInputStream;
-
-  @Before
-  public void setup() throws IOException {
-    when(throwInputStream.read()).thenThrow(IOException.class);
-    when(throwInputStream.read(any())).thenThrow(IOException.class);
-    when(throwInputStream.read(any(), anyInt(), anyInt())).thenThrow(IOException.class);
-  }
-
-  @Test
-  public void readBooleanThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readBoolean();
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
-  @Test
-  public void readIntThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readInt();
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
-  @Test
-  public void readLongThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readLong();
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
-  @Test
-  public void readFloatThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readFloat();
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
-  @Test
-  public void readDoubleThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readDouble();
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
-  @Test
-  public void readBytesThrowInputStream() {
-    try {
-      DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
-      decoder.readBytes(null);
-      Assert.fail();
-    } catch (Exception ignored) {
-      // Success
-    }
-  }
-
   @RunWith(Parameterized.class)
   public static class TestReadBoolean {
     private final ExpectedResult<Boolean> expected;
@@ -349,6 +274,85 @@ public class TestDirectBinaryDecoder {
         this.old = old;
         this.length = length;
         this.bytes = bytes;
+      }
+    }
+  }
+
+  @RunWith(MockitoJUnitRunner.class)
+  public static class TestReadThrowInputStream {
+    @Mock
+    private InputStream throwInputStream;
+
+    @Before
+    public void setup() throws IOException {
+      lenient().when(throwInputStream.read()).thenThrow(IOException.class);
+      lenient().when(throwInputStream.read(any())).thenThrow(IOException.class);
+      lenient().when(throwInputStream.read(any(), anyInt(), anyInt())).thenThrow(IOException.class);
+    }
+
+    @Test
+    public void readBooleanThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readBoolean();
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void readIntThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readInt();
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void readLongThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readLong();
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void readFloatThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readFloat();
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void readDoubleThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readDouble();
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void readBytesThrowInputStream() {
+      try {
+        DirectBinaryDecoder decoder = new DirectBinaryDecoder(throwInputStream);
+        decoder.readBytes(null);
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
       }
     }
   }
