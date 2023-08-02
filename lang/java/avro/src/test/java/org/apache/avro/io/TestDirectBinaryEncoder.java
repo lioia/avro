@@ -44,7 +44,7 @@ public class TestDirectBinaryEncoder {
     }
 
     @Test
-    public void readBoolean() {
+    public void writeBoolean() {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
         encoder.writeBoolean(parameter);
@@ -88,7 +88,7 @@ public class TestDirectBinaryEncoder {
     }
 
     @Test
-    public void readInt() {
+    public void writeInt() {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
         encoder.writeInt(parameter);
@@ -124,7 +124,7 @@ public class TestDirectBinaryEncoder {
     }
 
     @Test
-    public void readLong() {
+    public void writeLong() {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
         encoder.writeLong(parameter);
@@ -158,7 +158,7 @@ public class TestDirectBinaryEncoder {
     }
 
     @Test
-    public void readFloat() {
+    public void writeFloat() {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
         encoder.writeFloat(parameter);
@@ -192,7 +192,7 @@ public class TestDirectBinaryEncoder {
     }
 
     @Test
-    public void readDouble() {
+    public void writeDouble() {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
         encoder.writeDouble(parameter);
@@ -200,6 +200,63 @@ public class TestDirectBinaryEncoder {
         Assert.assertArrayEquals(expected.getResult().array(), outputStream.toByteArray());
       } catch (Exception e) {
         Assert.assertNotNull(this.expected.getException());
+      }
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class TestWriteFixed {
+    private final ExpectedResult<ByteBuffer> expected;
+    private final byte[] bytes;
+    private final int start;
+    private final int len;
+    private final OutputStream output;
+
+    public TestWriteFixed(TestParametersFixed parameters) {
+      this.expected = parameters.expected;
+      this.bytes = parameters.bytes;
+      this.start = parameters.start;
+      this.len = parameters.len;
+      this.output = parameters.output;
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParametersFixed> getParameters() {
+      byte[] bytes = new byte[]{0, 1};
+      ByteBuffer buffer2 = ByteBuffer.allocate(1).put((byte) 1);
+      return Arrays.asList(
+        new TestParametersFixed(new ExpectedResult<>(null, Exception.class), new byte[0], 0, 0, null),
+        new TestParametersFixed(new ExpectedResult<>(null, Exception.class), new byte[]{0}, 1, -1, new ByteArrayOutputStream()),
+        new TestParametersFixed(new ExpectedResult<>(null, Exception.class), new byte[0], 0, 1, new ByteArrayOutputStream()),
+        new TestParametersFixed(new ExpectedResult<>(buffer2, null), bytes, 1, 1, new ByteArrayOutputStream())
+      );
+    }
+
+    @Test
+    public void writeFixed() {
+      try {
+        DirectBinaryEncoder encoder = new DirectBinaryEncoder(output);
+        encoder.writeFixed(bytes, start, len);
+        ByteArrayOutputStream outputStream = (ByteArrayOutputStream) output;
+        Assert.assertArrayEquals(expected.getResult().array(), outputStream.toByteArray());
+      } catch (Exception e) {
+        Assert.assertNotNull(this.expected.getException());
+      }
+    }
+
+    public static class TestParametersFixed {
+      private final ExpectedResult<ByteBuffer> expected;
+      private final byte[] bytes;
+      private final int start;
+      private final int len;
+      private final OutputStream output;
+
+      public TestParametersFixed(ExpectedResult<ByteBuffer> expected, byte[] bytes, int start, int len, OutputStream output) {
+        this.expected = expected;
+        this.bytes = bytes;
+        this.start = start;
+        this.len = len;
+        this.output = output;
       }
     }
   }
@@ -265,6 +322,17 @@ public class TestDirectBinaryEncoder {
       try {
         DirectBinaryEncoder encoder = new DirectBinaryEncoder(throwOutputStream);
         encoder.writeDouble(0.1);
+        Assert.fail();
+      } catch (Exception ignored) {
+        // Success
+      }
+    }
+
+    @Test
+    public void writeFixedThrowOutputStream() {
+      try {
+        DirectBinaryEncoder encoder = new DirectBinaryEncoder(throwOutputStream);
+        encoder.writeFixed(new byte[0], -1, 1);
         Assert.fail();
       } catch (Exception ignored) {
         // Success
