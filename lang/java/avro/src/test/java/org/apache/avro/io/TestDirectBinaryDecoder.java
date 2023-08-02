@@ -2,7 +2,6 @@ package org.apache.avro.io;
 
 import org.apache.avro.utils.ExpectedResult;
 import org.apache.avro.utils.TestParametersDecoder;
-import org.apache.avro.utils.ThrowInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -13,8 +12,19 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @RunWith(Enclosed.class)
 public class TestDirectBinaryDecoder {
+  private static InputStream getThrowInputStream() throws IOException {
+    InputStream stream = mock(InputStream.class);
+    doThrow(IOException.class).when(stream).read();
+    doThrow(IOException.class).when(stream).read(any());
+    doThrow(IOException.class).when(stream).read(any(), anyInt(), anyInt());
+    return stream;
+  }
+
   @RunWith(Parameterized.class)
   public static class TestReadBoolean {
     private final ExpectedResult<Boolean> expected;
@@ -26,14 +36,14 @@ public class TestDirectBinaryDecoder {
     }
 
     @Parameterized.Parameters
-    public static Collection<TestParametersDecoder<Boolean>> getParameters() {
+    public static Collection<TestParametersDecoder<Boolean>> getParameters() throws IOException {
       byte[] randomData = new byte[]{0};
       while (randomData[0] == 1 || randomData[0] == 0) {
         new Random().nextBytes(randomData);
       }
       return Arrays.asList(
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), null),
-        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), getThrowInputStream()),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
         new TestParametersDecoder<>(new ExpectedResult<>(false, null), new ByteArrayInputStream(new byte[]{0})),
         new TestParametersDecoder<>(new ExpectedResult<>(true, null), new ByteArrayInputStream(new byte[]{1}))
@@ -64,11 +74,11 @@ public class TestDirectBinaryDecoder {
     }
 
     @Parameterized.Parameters
-    public static Collection<TestParametersDecoder<Integer>> getParameters() {
+    public static Collection<TestParametersDecoder<Integer>> getParameters() throws IOException {
       byte[] invalidValue = new byte[]{(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
       return Arrays.asList(
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), null),
-        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), getThrowInputStream()),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
         new TestParametersDecoder<>(new ExpectedResult<>(0, null), new ByteArrayInputStream(new byte[]{0})),
         new TestParametersDecoder<>(new ExpectedResult<>(-1, null), new ByteArrayInputStream(new byte[]{1})),
@@ -104,12 +114,12 @@ public class TestDirectBinaryDecoder {
     }
 
     @Parameterized.Parameters
-    public static Collection<TestParametersDecoder<Long>> getParameters() {
+    public static Collection<TestParametersDecoder<Long>> getParameters() throws IOException {
       byte[] invalidValue = new byte[10];
       Arrays.fill(invalidValue, (byte) 0xFF);
       return Arrays.asList(
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), null),
-        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), getThrowInputStream()),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
         new TestParametersDecoder<>(new ExpectedResult<>(0L, null), new ByteArrayInputStream(new byte[]{0})),
         new TestParametersDecoder<>(new ExpectedResult<>(-1L, null), new ByteArrayInputStream(new byte[]{1})),
@@ -145,12 +155,12 @@ public class TestDirectBinaryDecoder {
     }
 
     @Parameterized.Parameters
-    public static Collection<TestParametersDecoder<Float>> getParameters() {
+    public static Collection<TestParametersDecoder<Float>> getParameters() throws IOException {
       // 3.14 in IEEE 754 little endian
       byte[] pi = new byte[]{(byte) 0xc3, (byte) 0xf5, (byte) 0x48, (byte) 0x40};
       return Arrays.asList(
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), null),
-        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), getThrowInputStream()),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[]{4, 2, 0})),
         new TestParametersDecoder<>(new ExpectedResult<>(3.14f, null), new ByteArrayInputStream(pi))
@@ -180,12 +190,12 @@ public class TestDirectBinaryDecoder {
     }
 
     @Parameterized.Parameters
-    public static Collection<TestParametersDecoder<Double>> getParameters() {
+    public static Collection<TestParametersDecoder<Double>> getParameters() throws IOException {
       // 3.14 in IEEE 754 double precision little endian
       byte[] pi = new byte[]{(byte) 0x1F, (byte) 0x85, (byte) 0xEB, (byte) 0x51, (byte) 0xB8, (byte) 0x1E, (byte) 0x09, (byte) 0x40};
       return Arrays.asList(
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), null),
-        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ThrowInputStream()),
+        new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), getThrowInputStream()),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[0])),
         new TestParametersDecoder<>(new ExpectedResult<>(null, Exception.class), new ByteArrayInputStream(new byte[]{1, 2, 3, 4, 5, 6, 7})),
         new TestParametersDecoder<>(new ExpectedResult<>(3.14, null), new ByteArrayInputStream(pi))
@@ -276,6 +286,17 @@ public class TestDirectBinaryDecoder {
         this.length = length;
         this.bytes = bytes;
       }
+    }
+  }
+
+  @Test
+  public void readBytesThrowInputStream() {
+    try {
+      DirectBinaryDecoder decoder = new DirectBinaryDecoder(getThrowInputStream());
+      decoder.readBytes(null);
+      Assert.fail();
+    } catch (Exception ignored) {
+      // Success
     }
   }
 }
