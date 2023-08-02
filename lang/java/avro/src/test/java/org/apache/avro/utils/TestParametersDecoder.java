@@ -2,11 +2,11 @@ package org.apache.avro.utils;
 
 import java.io.InputStream;
 
-public class TestParameters<T> {
+public class TestParametersDecoder<T> {
   private final ExpectedResult<T> expected;
   private final InputStream input;
 
-  public TestParameters(ExpectedResult<T> expected, InputStream input) {
+  public TestParametersDecoder(ExpectedResult<T> expected, InputStream input) {
     this.expected = expected;
     this.input = input;
   }
