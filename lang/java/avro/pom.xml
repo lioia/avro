@@ -44,6 +44,7 @@
       *
     </osgi.import>
     <osgi.export>org.apache.avro*;version="${project.version}"</osgi.export>
+    <mockito.version>4.11.0</mockito.version>
   </properties>
 
   <build>
@@ -128,7 +129,9 @@
                     <argument>100</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
 
               <!-- Generate random data for interop tests, using deflate codec -->
@@ -144,7 +147,9 @@
                     <argument>deflate</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
 
               <!-- Generate random data for interop tests, using snappy codec -->
@@ -160,7 +165,9 @@
                     <argument>snappy</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
 
               <!-- Generate random data for interop tests, using bzip2 codec -->
@@ -176,7 +183,9 @@
                     <argument>bzip2</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
 
               <!-- Generate random data for interop tests, using xz codec -->
@@ -192,7 +201,9 @@
                     <argument>xz</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
 
               <!-- Generate random data for interop tests, using zstandard codec -->
@@ -208,7 +219,9 @@
                     <argument>zstandard</argument>
                   </arguments>
                 </configuration>
-                <goals><goal>java</goal></goals>
+                <goals>
+                  <goal>java</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
@@ -393,10 +406,10 @@
       <artifactId>hamcrest-library</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
