@@ -200,8 +200,8 @@ public class DirectBinaryEncodeDecodeIT {
     @Parameterized.Parameters
     public static Collection<TestParametersIntegration<byte[]>> getParameters() {
       return Arrays.asList(
-        new TestParametersIntegration<>(new ExpectedResult<>(null, Exception.class), new byte[0])
-//        new TestParametersIntegration<>(new ExpectedResult<>(new byte[]{1}, null), new byte[]{1})
+        new TestParametersIntegration<>(new ExpectedResult<>(new byte[0], Exception.class), new byte[0]),
+        new TestParametersIntegration<>(new ExpectedResult<>(new byte[]{1}, null), new byte[]{1})
       );
     }
 
@@ -210,6 +210,7 @@ public class DirectBinaryEncodeDecodeIT {
       try {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder(output, null);
+        encoder.writeLong(parameter.length);
         encoder.writeFixed(parameter);
         BinaryDecoder decoder = DecoderFactory.get().directBinaryDecoder(new ByteArrayInputStream(output.toByteArray()), null);
         ByteBuffer result = decoder.readBytes(null);
