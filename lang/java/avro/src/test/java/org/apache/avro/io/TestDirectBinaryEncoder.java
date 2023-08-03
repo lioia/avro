@@ -116,10 +116,15 @@ public class TestDirectBinaryEncoder {
     public static Collection<TestParametersEncoder<Long>> getParameters() {
       byte[] byteMinus1 = new byte[]{0x01};
       byte[] byte64 = new byte[]{(byte) 0x80, 0x01};
+      byte[] byteMinusMaxLengthMinus1 = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, 0x01};
+      byte[] byteMinus127 = new byte[]{(byte) 0xFD, 0x01};
       return Arrays.asList(
         new TestParametersEncoder<>(new ExpectedResult<>(null, Exception.class), 0L, null),
         new TestParametersEncoder<>(new ExpectedResult<>(ByteBuffer.wrap(byteMinus1), null), -1L, new ByteArrayOutputStream()),
-        new TestParametersEncoder<>(new ExpectedResult<>(ByteBuffer.wrap(byte64), null), 64L, new ByteArrayOutputStream())
+        new TestParametersEncoder<>(new ExpectedResult<>(ByteBuffer.wrap(byte64), null), 64L, new ByteArrayOutputStream()),
+        // PIT Improvements
+        new TestParametersEncoder<>(new ExpectedResult<>(ByteBuffer.wrap(byteMinusMaxLengthMinus1), null), -Long.MAX_VALUE - 1, new ByteArrayOutputStream()),
+        new TestParametersEncoder<>(new ExpectedResult<>(ByteBuffer.wrap(byteMinus127), null), -127L, new ByteArrayOutputStream())
       );
     }
 
