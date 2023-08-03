@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Arrays;
 
@@ -180,6 +181,39 @@ public class DirectBinaryEncodeDecodeIT {
         BinaryDecoder decoder = DecoderFactory.get().directBinaryDecoder(new ByteArrayInputStream(output.toByteArray()), null);
         Double result = decoder.readDouble();
         Assert.assertEquals(expected.getResult(), result);
+      } catch (Exception e) {
+        Assert.assertNotNull(expected.getException());
+      }
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class ByteArrayIT {
+    private final ExpectedResult<byte[]> expected;
+    private final byte[] parameter;
+
+    public ByteArrayIT(TestParametersIntegration<byte[]> parameters) {
+      this.expected = parameters.expected();
+      this.parameter = parameters.parameter();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParametersIntegration<byte[]>> getParameters() {
+      return Arrays.asList(
+        new TestParametersIntegration<>(new ExpectedResult<>(null, Exception.class), new byte[0])
+//        new TestParametersIntegration<>(new ExpectedResult<>(new byte[]{1}, null), new byte[]{1})
+      );
+    }
+
+    @Test
+    public void byteArrayTest() {
+      try {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder(output, null);
+        encoder.writeFixed(parameter);
+        BinaryDecoder decoder = DecoderFactory.get().directBinaryDecoder(new ByteArrayInputStream(output.toByteArray()), null);
+        ByteBuffer result = decoder.readBytes(null);
+        Assert.assertArrayEquals(expected.getResult(), result.array());
       } catch (Exception e) {
         Assert.assertNotNull(expected.getException());
       }
