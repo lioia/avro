@@ -220,4 +220,84 @@ public class DirectBinaryEncodeDecodeIT {
       }
     }
   }
+
+  @RunWith(Parameterized.class)
+  public static class EverythingIT {
+    private final Class<? extends java.lang.Throwable> exception;
+    private final boolean booleanValue;
+    private final int intValue;
+    private final long longValue;
+    private final float floatValue;
+    private final double doubleValue;
+    private final byte[] bytes;
+
+    public EverythingIT(TestParametersEverything parameters) {
+      this.exception = parameters.exception;
+      this.booleanValue = parameters.booleanValue;
+      this.intValue = parameters.integerValue;
+      this.longValue = parameters.longValue;
+      this.floatValue = parameters.floatValue;
+      this.doubleValue = parameters.doubleValue;
+      this.bytes = parameters.bytes;
+    }
+
+    @Parameterized.Parameters
+    public static Collection<TestParametersEverything> getParameters() {
+      return Arrays.asList(
+        new TestParametersEverything(null, false, -1, -1, -0.1f, -0.1, new byte[0]),
+        new TestParametersEverything(null, true, 0, 0, 0f, 0.0, new byte[]{0}),
+        new TestParametersEverything(null, false, 1, 1, 0.1f, 0.1, new byte[0])
+      );
+    }
+
+    @Test
+    public void byteArrayTest() {
+      try {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder(output, null);
+        encoder.writeBoolean(booleanValue);
+        encoder.writeInt(intValue);
+        encoder.writeLong(longValue);
+        encoder.writeFloat(floatValue);
+        encoder.writeDouble(doubleValue);
+        encoder.writeLong(bytes.length);
+        encoder.writeFixed(bytes);
+        BinaryDecoder decoder = DecoderFactory.get().directBinaryDecoder(new ByteArrayInputStream(output.toByteArray()), null);
+        boolean booleanResult = decoder.readBoolean();
+        int intResult = decoder.readInt();
+        long longResult = decoder.readLong();
+        float floatResult = decoder.readFloat();
+        double doubleResult = decoder.readDouble();
+        byte[] bytesResult = decoder.readBytes(null).array();
+        Assert.assertEquals(booleanValue, booleanResult);
+        Assert.assertEquals(intValue, intResult);
+        Assert.assertEquals(longValue, longResult);
+        Assert.assertEquals(floatValue, floatResult, 0.05);
+        Assert.assertEquals(doubleValue, doubleResult, 0.05);
+        Assert.assertArrayEquals(bytes, bytesResult);
+      } catch (Exception e) {
+        Assert.assertNotNull(exception);
+      }
+    }
+
+    public static class TestParametersEverything {
+      private final Class<? extends java.lang.Throwable> exception;
+      private final boolean booleanValue;
+      private final int integerValue;
+      private final long longValue;
+      private final float floatValue;
+      private final double doubleValue;
+      private final byte[] bytes;
+
+      public TestParametersEverything(Class<? extends Throwable> exception, boolean booleanValue, int integerValue, long longValue, float floatValue, double doubleValue, byte[] bytes) {
+        this.exception = exception;
+        this.booleanValue = booleanValue;
+        this.integerValue = integerValue;
+        this.longValue = longValue;
+        this.floatValue = floatValue;
+        this.doubleValue = doubleValue;
+        this.bytes = bytes;
+      }
+    }
+  }
 }
