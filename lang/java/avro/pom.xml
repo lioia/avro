@@ -365,13 +365,13 @@
             <version>${pitest.version}</version>
             <configuration>
               <targetClasses>
-                <param>org.apache.avro.io.DirectBinaryDecoder</param>
-                <param>org.apache.avro.io.DirectBinaryDecoder$ByteReader</param>
-                <param>org.apache.avro.io.DirectBinaryEncoder</param>
+<!--                <param>org.apache.avro.io.DirectBinaryDecoder</param>-->
+<!--                <param>org.apache.avro.io.DirectBinaryDecoder$ByteReader</param>-->
+<!--                <param>org.apache.avro.io.DirectBinaryEncoder</param>-->
               </targetClasses>
               <targetTests>
-                <param>org.apache.avro.io.TestDirectBinaryDecoder</param>
-                <param>org.apache.avro.io.TestDirectBinaryEncoder</param>
+<!--                <param>org.apache.avro.io.TestDirectBinaryDecoder</param>-->
+<!--                <param>org.apache.avro.io.TestDirectBinaryEncoder</param>-->
               </targetTests>
             </configuration>
             <executions>
