@@ -59,6 +59,8 @@ public class TestSchema {
     field7.addProp("logicalType", "uuid");
     Schema recordSchema7 = Schema.createRecord("RecordTest7", null, "com.example", false, Collections.singletonList(field7));
     Schema enumSchema2 = Schema.createEnum("EnumTest2", null, "com.example", Arrays.asList("c", "d"));
+    Schema errorSchema = Schema.createRecord("ErrorTest", null, "com.example", true, Collections.singletonList(new Schema.Field("ErrorField", Schema.create(Schema.Type.STRING))));
+    errorSchema.addAlias("alias");
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -99,6 +101,12 @@ public class TestSchema {
         {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTestErr1\"}"), validNames, exception},
         {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTestErr2\", \"symbols\": \"error\"}"), validNames, exception},
         {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTest2\", \"symbols\": [\"c\", \"d\"], \"default\": \"d\"}"), validNames, new ExpectedResult<>(enumSchema2, null)},
+        {createNodeFromString("{\"type\": \"array\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"map\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"fixed\", \"name\": \"FixedTestErr3\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"fixed\", \"size\": \"test\", \"name\": \"FixedTestErr2\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTest8\", \"fields\": [{\"name\": \"Internal\", \"type\": [\"int\", {\"type\": \"RecordTest7\"}, {\"type\": \"UnknownType\"}]}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"error\", \"name\": \"ErrorTest\", \"aliases\": [\"alias\"], \"fields\": [{\"name\": \"ErrorField\", \"type\": \"string\"}]}"), validNames, new ExpectedResult<>(errorSchema, null)},
       }
     );
   }
@@ -117,7 +125,6 @@ public class TestSchema {
   public void parseTest() {
     try {
       Schema result = Schema.parse(node, names);
-      // TODO: better check
       Assert.assertEquals(expected.getResult(), result);
     } catch (Exception ignored) {
       Assert.assertNotNull(expected.getException());
