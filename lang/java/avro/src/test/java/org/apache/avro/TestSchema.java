@@ -12,6 +12,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.apache.avro.SchemaCompatibility.*;
@@ -36,11 +37,28 @@ public class TestSchema {
       new Schema.Field("b", Schema.create(Schema.Type.FLOAT))
     );
     Schema recordSchema = Schema.createRecord("RecordTest", null, "com.example", false, recordFields);
-    Schema enumSchema = Schema.createEnum("EnumTest", null, null, Arrays.asList("a", "b"));
+    Schema enumSchema = Schema.createEnum("EnumTest", null, "com.example", Arrays.asList("a", "b"));
     Schema arraySchema = Schema.createArray(Schema.create(Schema.Type.INT));
     Schema mapSchema = Schema.createMap(Schema.create(Schema.Type.INT));
     Schema unionSchema = Schema.createUnion(Schema.create(Schema.Type.INT), Schema.create(Schema.Type.STRING));
-    Schema fixedSchema = Schema.createFixed("FixedTest", null, null, 16);
+    Schema fixedSchema = Schema.createFixed("FixedTest", null, "com.example", 16);
+    List<Schema.Field> recordFields2 = Collections.singletonList(new Schema.Field("a", Schema.create(Schema.Type.BOOLEAN), null, true, Schema.Field.Order.IGNORE));
+    Schema recordSchema2 = Schema.createRecord("RecordTest2", null, "com.example", false, recordFields2);
+    List<Schema.Field> recordFields3 = Collections.singletonList(new Schema.Field("pi", Schema.create(Schema.Type.DOUBLE), null, 3.14));
+    Schema recordSchema3 = Schema.createRecord("RecordTest3", null, "com.example", false, recordFields3);
+    List<Schema.Field> recordFields4 = Collections.singletonList(new Schema.Field("twoPi", Schema.create(Schema.Type.FLOAT), null, 6.28));
+    Schema recordSchema4 = Schema.createRecord("RecordTest4", null, "com.example", false, recordFields4);
+    List<Schema.Field> recordFields5 = Collections.singletonList(new Schema.Field("twoPi", Schema.create(Schema.Type.FLOAT), null, 6.28));
+    Schema recordSchema5 = Schema.createRecord("RecordTest5", null, "com.example", false, recordFields5);
+    Schema.Field uuidField = new Schema.Field("uuid", Schema.create(Schema.Type.STRING));
+    uuidField.schema().setLogicalType(LogicalTypes.uuid());
+    uuidField.schema().addProp("logicalType", "uuid");
+    uuidField.addProp("additional", "value");
+    Schema recordSchema6 = Schema.createRecord("RecordTest6", null, "com.example", false, Collections.singletonList(uuidField));
+    Schema.Field field7 = new Schema.Field("uuidFake", Schema.create(Schema.Type.STRING));
+    field7.addProp("logicalType", "uuid");
+    Schema recordSchema7 = Schema.createRecord("RecordTest7", null, "com.example", false, Collections.singletonList(field7));
+    Schema enumSchema2 = Schema.createEnum("EnumTest2", null, "com.example", Arrays.asList("c", "d"));
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -60,6 +78,27 @@ public class TestSchema {
         {createNodeFromString("{\"type\": \"map\", \"values\": \"int\"}"), validNames, new ExpectedResult<>(mapSchema, null)},
         {createNodeFromString("[\"int\", \"string\"]"), null, exception},
         {createNodeFromString("{\"type\": \"fixed\", \"size\": 16, \"name\": \"FixedTest\"}"), mockNames, exception},
+        // Improvements
+        {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTest\", \"symbols\": [\"a\", \"b\"]}"), validNames, new ExpectedResult<>(enumSchema, null)},
+        {createNodeFromString("{\"type\": \"array\", \"items\": \"int\"}"), validNames, new ExpectedResult<>(arraySchema, null)},
+        {createNodeFromString("{\"type\": \"fixed\", \"size\": 16, \"name\": \"FixedTest\"}"), validNames, new ExpectedResult<>(fixedSchema, null)},
+        {createNodeFromString("[\"int\", \"string\"]"), validNames, new ExpectedResult<>(unionSchema, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr1\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr2\", \"fields\": \"error\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr3\", \"fields\": [{\"name\":\"a\",\"no-type\":\"error\"}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr4\", \"fields\": [{\"name\":\"a\",\"type\": 0}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr5\", \"fields\": [{\"name\":\"a\", \"type\": \"invalid\"}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest2\", \"fields\": [{\"name\": \"a\", \"type\": \"boolean\", \"order\": \"ignore\", \"default\": true}]}"), validNames, new ExpectedResult<>(recordSchema2, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr6\", \"fields\": [{\"name\": \"a\", \"type\": \"boolean\", \"default\": 0}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTestErr7\", \"fields\": [{\"name\": \"a\", \"type\": \"int\", \"order\": \"invalid\"}]}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest3\", \"fields\": [{\"name\": \"pi\", \"type\": \"double\", \"default\": \"3.14\"}]}"), validNames, new ExpectedResult<>(recordSchema3, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest4\", \"fields\": [{\"name\": \"twoPi\", \"type\": \"float\", \"default\": \"6.28\"}]}"), validNames, new ExpectedResult<>(recordSchema4, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest5\", \"fields\": [{\"name\": \"twoPi\", \"type\": \"float\", \"default\": 6.28}]}"), validNames, new ExpectedResult<>(recordSchema5, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest6\",\"fields\": [{\"name\": \"uuid\",\"type\": {\"type\": \"string\", \"logicalType\": \"uuid\"},\"additional\": \"value\"}]}"), validNames, new ExpectedResult<>(recordSchema6, null)},
+        {createNodeFromString("{\"type\": \"record\",\"name\": \"RecordTest7\",\"fields\": [{\"name\": \"uuidFake\",\"type\": \"string\", \"logicalType\": \"uuid\"}]}"), validNames, new ExpectedResult<>(recordSchema7, null)},
+        {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTestErr1\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTestErr2\", \"symbols\": \"error\"}"), validNames, exception},
+        {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTest2\", \"symbols\": [\"c\", \"d\"], \"default\": \"d\"}"), validNames, new ExpectedResult<>(enumSchema2, null)},
       }
     );
   }
