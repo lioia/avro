@@ -61,6 +61,18 @@ public class TestSchema {
     Schema enumSchema2 = Schema.createEnum("EnumTest2", null, "com.example", Arrays.asList("c", "d"));
     Schema errorSchema = Schema.createRecord("ErrorTest", null, "com.example", true, Collections.singletonList(new Schema.Field("ErrorField", Schema.create(Schema.Type.STRING))));
     errorSchema.addAlias("alias");
+    Schema recordSchema9 = Schema.createRecord("RecordTest9", null, "com.example", false, Collections.singletonList(new Schema.Field("Field9", Schema.create(Schema.Type.STRING))));
+    recordSchema9.addProp("additional", "value");
+    Schema enumSchema3 = Schema.createEnum("EnumTest3", null, "com.example", Arrays.asList("a", "b"));
+    enumSchema3.addAlias("Enum3");
+    enumSchema3.addProp("additional", "value");
+    Schema arraySchema2 = Schema.createArray(Schema.create(Schema.Type.INT));
+    arraySchema2.addProp("additional", "value");
+    Schema mapSchema2 = Schema.createMap(Schema.create(Schema.Type.INT));
+    mapSchema2.addProp("additional", "value");
+    Schema fixedSchema2 = Schema.createFixed("FixedTest2", null, "com.example", 16);
+    fixedSchema2.addAlias("Fixed2");
+    fixedSchema2.addProp("additional", "value");
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -107,6 +119,12 @@ public class TestSchema {
         {createNodeFromString("{\"type\": \"fixed\", \"size\": \"test\", \"name\": \"FixedTestErr2\"}"), validNames, exception},
         {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTest8\", \"fields\": [{\"name\": \"Internal\", \"type\": [\"int\", {\"type\": \"RecordTest7\"}, {\"type\": \"UnknownType\"}]}]}"), validNames, exception},
         {createNodeFromString("{\"type\": \"error\", \"name\": \"ErrorTest\", \"aliases\": [\"alias\"], \"fields\": [{\"name\": \"ErrorField\", \"type\": \"string\"}]}"), validNames, new ExpectedResult<>(errorSchema, null)},
+        // ba-dua specific improvements
+        {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTest9\", \"additional\": \"value\" ,\"fields\": [{\"name\": \"Field9\", \"type\": \"string\"}]}"), validNames, new ExpectedResult<>(recordSchema9, null)},
+        {createNodeFromString("{\"type\": \"enum\", \"name\": \"EnumTest3\", \"aliases\": [\"Enum3\"], \"additional\": \"value\", \"symbols\": [\"a\", \"b\"]}"), validNames, new ExpectedResult<>(enumSchema3, null)},
+        {createNodeFromString("{\"type\": \"array\", \"additional\": \"value\", \"items\": \"int\"}"), validNames, new ExpectedResult<>(arraySchema2, null)},
+        {createNodeFromString("{\"type\": \"map\", \"additional\": \"value\", \"values\": \"int\"}"), validNames, new ExpectedResult<>(mapSchema2, null)},
+        {createNodeFromString("{\"type\": \"fixed\", \"size\": 16, \"name\": \"FixedTest2\", \"aliases\": [\"Fixed2\"], \"additional\": \"value\"}"), validNames, new ExpectedResult<>(fixedSchema2, null)},
       }
     );
   }
