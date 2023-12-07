@@ -10,10 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.avro.SchemaCompatibility.*;
 import static org.mockito.Mockito.*;
@@ -144,6 +141,19 @@ public class TestSchema {
     try {
       Schema result = Schema.parse(node, names);
       Assert.assertEquals(expected.getResult(), result);
+      // PIT improvements
+      // Checking if it was added to names (only if it's a NamedSchema)
+      if (!Schema.PRIMITIVES.containsKey(expected.getResult().getType().getName())
+        && expected.getResult().getType() != Schema.Type.MAP
+        && expected.getResult().getType() != Schema.Type.ARRAY
+        && expected.getResult().getType() != Schema.Type.UNION) {
+        // L1723,1724,1774,1775,1791,1792
+        Assert.assertTrue(names.contains(result));
+        // L1814,1818
+        Assert.assertEquals(expected.getResult().getAliases().size(), result.getAliases().size());
+        Assert.assertTrue(expected.getResult().getAliases().containsAll(result.getAliases()));
+        Assert.assertTrue(result.getAliases().containsAll(expected.getResult().getAliases()));
+      }
     } catch (Exception ignored) {
       Assert.assertNotNull(expected.getException());
     }
