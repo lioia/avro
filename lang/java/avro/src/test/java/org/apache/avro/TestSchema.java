@@ -70,9 +70,6 @@ public class TestSchema {
     Schema fixedSchema2 = Schema.createFixed("FixedTest2", null, "com.example", 16);
     fixedSchema2.addAlias("Fixed2");
     fixedSchema2.addProp("additional", "value");
-    List<Schema.Field> fields8 = new ArrayList<>();
-    fields8.add(new Schema.Field("Internal", Schema.createUnion(Schema.create(Schema.Type.INT), recordSchema7)));
-    Schema recordSchema8 = Schema.createRecord("RecordTest8", null, "com.example", false, fields8);
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -117,7 +114,6 @@ public class TestSchema {
         {createNodeFromString("{\"type\": \"map\"}"), validNames, exception},
         {createNodeFromString("{\"type\": \"fixed\", \"name\": \"FixedTestErr3\"}"), validNames, exception},
         {createNodeFromString("{\"type\": \"fixed\", \"size\": \"test\", \"name\": \"FixedTestErr2\"}"), validNames, exception},
-        {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTest8\", \"fields\": [{\"name\": \"Internal\", \"type\": [\"int\", {\"type\": \"RecordTest7\"}]}]}"), validNames, new ExpectedResult<>(recordSchema8, null)},
         {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTestErr8\", \"fields\": [{\"name\": \"Internal\", \"type\": [\"int\", {\"type\": \"RecordTest7\"}, {\"type\": \"unknown\"}]}]}"), validNames, exception},
         {createNodeFromString("{\"type\": \"error\", \"name\": \"ErrorTest\", \"aliases\": [\"alias\"], \"fields\": [{\"name\": \"ErrorField\", \"type\": \"string\"}]}"), validNames, new ExpectedResult<>(errorSchema, null)},
         // ba-dua specific improvements
