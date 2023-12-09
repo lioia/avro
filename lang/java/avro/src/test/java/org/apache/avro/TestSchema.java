@@ -70,6 +70,8 @@ public class TestSchema {
     Schema fixedSchema2 = Schema.createFixed("FixedTest2", null, "com.example", 16);
     fixedSchema2.addAlias("Fixed2");
     fixedSchema2.addProp("additional", "value");
+    Schema.Field field10 = new Schema.Field("Field10", Schema.createUnion(enumSchema));
+    Schema recordSchema10 = Schema.createRecord("RecordTest10", null, "com.example", false, Collections.singletonList(field10));
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -122,6 +124,8 @@ public class TestSchema {
         {createNodeFromString("{\"type\": \"array\", \"additional\": \"value\", \"items\": \"int\"}"), validNames, new ExpectedResult<>(arraySchema2, null)},
         {createNodeFromString("{\"type\": \"map\", \"additional\": \"value\", \"values\": \"int\"}"), validNames, new ExpectedResult<>(mapSchema2, null)},
         {createNodeFromString("{\"type\": \"fixed\", \"size\": 16, \"name\": \"FixedTest2\", \"aliases\": [\"Fixed2\"], \"additional\": \"value\"}"), validNames, new ExpectedResult<>(fixedSchema2, null)},
+        // PIT improvements
+//        {createNodeFromString("{\"type\": \"record\", \"name\": \"RecordTest10\", \"fields\": [{\"name\": \"Field10\", \"type\": [{\"type\": \"EnumTest\"}]}]}"), validNames, new ExpectedResult<>(recordSchema10, null)},
       }
     );
   }
