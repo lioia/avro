@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static org.mockito.Mockito.*;
-
 @RunWith(Parameterized.class)
 public class TestGenericData {
   @Parameterized.Parameters
@@ -38,8 +36,6 @@ public class TestGenericData {
     Map<Object, Object> mapData = new HashMap<>();
     mapData.put("Test", 3);
     mapData.put("Test2", 0.14f);
-    Schema mockSchema = mock(Schema.class);
-    when(mockSchema.getType()).thenReturn(Schema.Type.valueOf(""));
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
