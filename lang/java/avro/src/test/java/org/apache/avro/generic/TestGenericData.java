@@ -34,8 +34,9 @@ public class TestGenericData {
     Schema recordSchema2 = Schema.createRecord("RecordTest2", null, null, false, fields2);
     GenericData.Array<Integer> arrayData2 = new GenericData.Array<>(arraySchema1, Arrays.asList(3, 4));
     Map<Object, Object> mapData = new HashMap<>();
-    mapData.put("Test", 3);
-    mapData.put("Test2", 0.14f);
+    mapData.put("Test", 0.14f);
+    Map<Object, Object> mapData2 = new HashMap<>();
+    mapData2.put("Test", 3);
     return Arrays.asList(
       new Object[][]{
         {null, null, exception},
@@ -64,8 +65,11 @@ public class TestGenericData {
         {arraySchema1, Collections.singletonList(3.14f), falseExp},
         {mapSchema1, 3, falseExp},
         {mapSchema1, mapData, falseExp},
+        {mapSchema1, mapData2, trueExp},
         {fixedSchema1, 3, falseExp},
         {fixedSchema1, new GenericData.Fixed(fixedSchema1, new byte[8]), falseExp},
+        // PIT Improvements
+        {enumSchema1, new GenericData.EnumSymbol(enumSchema1, "c"), falseExp},
       }
     );
   }
@@ -85,6 +89,17 @@ public class TestGenericData {
     try {
       boolean result = GenericData.get().validate(schema, datum);
       Assert.assertEquals(expected.getResult(), result);
+      // PIT improvements
+      if (schema.getType() == Schema.Type.ENUM && datum instanceof GenericData.EnumSymbol) {
+        GenericData.EnumSymbol enumSymbol = (GenericData.EnumSymbol) datum;
+        Assert.assertEquals(result, schema.hasEnumSymbol(enumSymbol.toString()));
+      }
+      if(schema.getType() == Schema.Type.MAP && datum instanceof Map) {
+        Map<String, Object> mapValue = (Map<String, Object>) datum;
+        for (Map.Entry<String, Object> entry : mapValue.entrySet()) {
+          Assert.assertEquals(result, entry.getValue() instanceof Integer);
+        }
+      }
     } catch (Exception ignored) {
       Assert.assertNotNull(expected.getException());
     }
