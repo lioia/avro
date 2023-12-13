@@ -70,6 +70,11 @@ public class TestGenericData {
         {fixedSchema1, new GenericData.Fixed(fixedSchema1, new byte[8]), falseExp},
         // PIT Improvements
         {enumSchema1, new GenericData.EnumSymbol(enumSchema1, "c"), falseExp},
+        {Schema.create(Schema.Type.STRING), "Test", trueExp},
+        {Schema.create(Schema.Type.BYTES), 3, falseExp},
+        {Schema.create(Schema.Type.LONG), 3.14f, falseExp},
+        {Schema.create(Schema.Type.DOUBLE), 3, falseExp},
+        {Schema.create(Schema.Type.BOOLEAN), 3, falseExp},
       }
     );
   }
@@ -94,7 +99,7 @@ public class TestGenericData {
         GenericData.EnumSymbol enumSymbol = (GenericData.EnumSymbol) datum;
         Assert.assertEquals(result, schema.hasEnumSymbol(enumSymbol.toString()));
       }
-      if(schema.getType() == Schema.Type.MAP && datum instanceof Map) {
+      if (schema.getType() == Schema.Type.MAP && datum instanceof Map) {
         Map<String, Object> mapValue = (Map<String, Object>) datum;
         for (Map.Entry<String, Object> entry : mapValue.entrySet()) {
           Assert.assertEquals(result, entry.getValue() instanceof Integer);
