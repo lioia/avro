@@ -192,4 +192,27 @@ public class TestSchema {
       }
     }
   }
+
+  public static class TestNonParameterized2 {
+    private final Schema schema;
+    private final JsonNode node;
+    private final Schema.Names names;
+
+    public TestNonParameterized2() throws JsonProcessingException {
+      Schema unionSchema = Schema.createUnion(Schema.createEnum("EnumTest", null, "com.example", Arrays.asList("a", "b")));
+      Schema.Field field = new Schema.Field("Field", unionSchema);
+      schema = Schema.createRecord("RecordTest", null, "com.example", false, Collections.singletonList(field));
+      names = new Schema.Names("com.example.2");
+      node = createNodeFromString("{\"type\":\"record\",\"name\":\"RecordTest\",\"namespace\":\"com.example\",\"fields\":[{\"name\":\"Field\",\"type\":[{\"type\":\"enum\",\"name\":\"EnumTest\",\"namespace\":\"com.example\",\"symbols\":[\"a\",\"b\"]}]}]}");
+    }
+
+    @Test
+    public void parseTest() {
+      Schema result = Schema.parse(node, names);
+      Assert.assertEquals(result, schema);
+      Assert.assertEquals(result.getNamespace(), "com.example");
+      Assert.assertEquals(result.getField("Field").schema().getTypes().get(0).getNamespace(), "com.example");
+      Assert.assertEquals(names.space(), "com.example.2");
+    }
+  }
 }
