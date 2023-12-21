@@ -227,6 +227,8 @@ public class TestGenericData {
         // ba-dua improvements
         {unionSchema4, new UUID(1, 1), exception},
         {unionSchema5, new UUID(1, 1), zero},
+        // PIT improvements
+        {unionSchema, "generic", one},
       });
     }
 
