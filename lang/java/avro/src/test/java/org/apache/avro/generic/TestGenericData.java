@@ -1,9 +1,12 @@
 package org.apache.avro.generic;
 
 import net.bytebuddy.description.type.TypeList;
+import org.apache.avro.Conversions;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.utils.ExpectedResult;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -191,6 +194,56 @@ public class TestGenericData {
     public void induceTest() {
       try {
         Schema result = GenericData.get().induce(datum);
+        Assert.assertEquals(expected.getResult(), result);
+      } catch (Exception ignored) {
+        Assert.assertNotNull(expected.getException());
+      }
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class TestResolveUnion {
+    @Parameterized.Parameters
+    public static Collection<Object[]> getParameters() {
+      Schema unionSchema = Schema.createUnion(Schema.create(Schema.Type.INT), Schema.create(Schema.Type.STRING));
+      Schema stringUuid = new Schema.Parser().parse("{\"type\":\"string\",\"logicalType\":\"uuid\"}");
+      Schema unionSchema2 = Schema.createUnion(Schema.create(Schema.Type.INT), stringUuid);
+      Schema intDate = new Schema.Parser().parse("{\"type\":\"int\",\"logicalType\":\"date\"}");
+      Schema unionSchema3 = Schema.createUnion(intDate, stringUuid);
+      ExpectedResult<Integer> zero = new ExpectedResult<>(0, null);
+      ExpectedResult<Integer> one = new ExpectedResult<>(1, null);
+      ExpectedResult<Integer> exception = new ExpectedResult<>(null, Exception.class);
+      return Arrays.asList(new Object[][]{
+        {null, null, exception},
+        {Schema.create(Schema.Type.STRING), 3.14f, exception},
+        {unionSchema, 3, zero},
+        {null, "generic", exception},
+        // improvements
+        {unionSchema, new UUID(1,1), exception},
+        {unionSchema2, new UUID(1,1), one},
+        {unionSchema3, new UUID(1,1), one},
+      });
+    }
+
+    private final Schema union;
+    private final Object datum;
+    private final ExpectedResult<Integer> expected;
+
+    public TestResolveUnion(Schema union, Object datum, ExpectedResult<Integer> expected) {
+      this.union = union;
+      this.datum = datum;
+      this.expected = expected;
+    }
+
+    @Before
+    public void setup() {
+      GenericData.get().addLogicalTypeConversion(new Conversions.UUIDConversion());
+    }
+
+    @Test
+    public void resolveUnionTest() {
+      try {
+        Integer result = GenericData.get().resolveUnion(union, datum);
         Assert.assertEquals(expected.getResult(), result);
       } catch (Exception ignored) {
         Assert.assertNotNull(expected.getException());
