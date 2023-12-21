@@ -145,6 +145,14 @@ public class TestGenericData {
       Schema fixedSchema1 = Schema.createFixed(null, null, null, 16);
       GenericData.Fixed fixed1 = new GenericData.Fixed(fixedSchema1);
 
+      Map<String, String> map2 = new HashMap<>();
+      map2.put("key1", "value1");
+      map2.put("key2", null);
+
+      Map<String, String> map3 = new HashMap<>();
+      map3.put("key1", "value1");
+      map3.put("key2", "value2");
+
       ExpectedResult<Schema> exception = new ExpectedResult<>(null, Exception.class);
       return Arrays.asList(new Object[][]{
         {new GenericData(), exception},
@@ -161,6 +169,13 @@ public class TestGenericData {
         {array1, new ExpectedResult<>(arraySchema1, null)},
         {map1, new ExpectedResult<>(mapSchema1, null)},
         {fixed1, new ExpectedResult<>(fixedSchema1, null)},
+        // Improvements
+        {Arrays.asList(3, null), exception},
+        {Arrays.asList(3, 4), new ExpectedResult<>(arraySchema1, null)},
+        {Collections.emptyList(), exception},
+        {map2, exception},
+        {map3, new ExpectedResult<>(mapSchema1, null)},
+        {new HashMap<>(), exception},
       });
     }
 
