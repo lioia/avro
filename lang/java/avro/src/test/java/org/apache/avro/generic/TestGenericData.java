@@ -210,6 +210,8 @@ public class TestGenericData {
       Schema unionSchema2 = Schema.createUnion(Schema.create(Schema.Type.INT), stringUuid);
       Schema intDate = new Schema.Parser().parse("{\"type\":\"int\",\"logicalType\":\"date\"}");
       Schema unionSchema3 = Schema.createUnion(intDate, stringUuid);
+      Schema unionSchema4 = Schema.createUnion();
+      Schema unionSchema5 = Schema.createUnion(stringUuid);
       ExpectedResult<Integer> zero = new ExpectedResult<>(0, null);
       ExpectedResult<Integer> one = new ExpectedResult<>(1, null);
       ExpectedResult<Integer> exception = new ExpectedResult<>(null, Exception.class);
@@ -218,10 +220,13 @@ public class TestGenericData {
         {Schema.create(Schema.Type.STRING), 3.14f, exception},
         {unionSchema, 3, zero},
         {null, "generic", exception},
-        // improvements
-        {unionSchema, new UUID(1,1), exception},
-        {unionSchema2, new UUID(1,1), one},
-        {unionSchema3, new UUID(1,1), one},
+        // JaCoCo improvements
+        {unionSchema, new UUID(1, 1), exception},
+        {unionSchema2, new UUID(1, 1), one},
+        {unionSchema3, new UUID(1, 1), one},
+        // ba-dua improvements
+        {unionSchema4, new UUID(1, 1), exception},
+        {unionSchema5, new UUID(1, 1), zero},
       });
     }
 
