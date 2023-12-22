@@ -322,6 +322,9 @@ public class TestGenericData {
         {record2, record1, recordSchema, true, minus1},
         {record1, record3, recordSchema, true, zero},
         {record4, record5, recordSchema2, true, minus1},
+        // PIT improvements
+        {new GenericData.EnumSymbol(enumSchema, "b"), new GenericData.EnumSymbol(enumSchema, "a"), enumSchema, true, one},
+        {new GenericData.EnumSymbol(enumSchema, "a"), new GenericData.EnumSymbol(enumSchema, "b"), enumSchema, true, minus1},
       });
     }
 
