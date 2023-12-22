@@ -11,11 +11,13 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.internal.exceptions.util.ScenarioPrinter;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -251,6 +253,72 @@ public class TestGenericData {
     public void resolveUnionTest() {
       try {
         Integer result = GenericData.get().resolveUnion(union, datum);
+        Assert.assertEquals(expected.getResult(), result);
+      } catch (Exception ignored) {
+        Assert.assertNotNull(expected.getException());
+      }
+    }
+  }
+
+//  com(true),eq(true),BooleanSchema,true, 0
+//  inc(int 3),ne(float 3.14),RecordSchema,false, exception
+//  com("a"),eq("a"),EnumSchema,true, 0
+//  inc(int 3),ne(float 3.14),ArraySchema,false, exception
+//  com(Map with "key": "value"),eq(Map with "key": "value"),MapSchema,true, 0
+//  inc(map),ne(float 3.14),UnionSchema,false, exception
+//  com(Fixed(3)),eq(Fixed(3)),FixedSchema,true, 0
+
+  @RunWith(Parameterized.class)
+  public static class TestCompare {
+    @Parameterized.Parameters
+    public static Collection<Object[]> getParameters() {
+      Schema recordSchema = Schema.createRecord("Record1", null, null, false, Collections.singletonList(new Schema.Field("a", Schema.create(Schema.Type.INT))));
+      Schema enumSchema = Schema.createEnum("Enum1", null, null, Arrays.asList("a", "b"));
+      Schema arraySchema = Schema.createArray(Schema.create(Schema.Type.INT));
+      Schema mapSchema = Schema.createMap(Schema.create(Schema.Type.INT));
+      Schema unionSchema = Schema.createUnion(Schema.create(Schema.Type.INT), Schema.create(Schema.Type.STRING));
+      Schema fixedSchema = Schema.createFixed("Fixed1", null, null, 16);
+      Map<String, Integer> map = new HashMap<>();
+      map.put("key", 0);
+      ExpectedResult<Integer> zero = new ExpectedResult<>(0, null);
+      ExpectedResult<Integer> exception = new ExpectedResult<>(null, Exception.class);
+      return Arrays.asList(new Object[][]{
+//        {null, null, null, true, exception}, // Fail: shouldn't work with invalid schema
+//        {"generic", 3, Schema.create(Schema.Type.NULL), false, exception}, // Fail: objects are incompatible with schema
+        {"generic", "generic", Schema.create(Schema.Type.STRING), true, zero},
+        {"generic", 3, Schema.create(Schema.Type.BYTES), false, exception},
+        {3, 3, Schema.create(Schema.Type.INT), true, zero},
+        {3.14f, 3, Schema.create(Schema.Type.LONG), false, exception},
+        {3.14f, 3.14f, Schema.create(Schema.Type.FLOAT), true, zero},
+        {3, 3.14f, Schema.create(Schema.Type.DOUBLE), false, exception},
+        {true, true, Schema.create(Schema.Type.BOOLEAN), true, zero},
+        {3, 3.14f, recordSchema, false, exception},
+        {new GenericData.EnumSymbol(enumSchema, "a"), new GenericData.EnumSymbol(enumSchema, "a"), enumSchema, true, zero},
+        {3, 3.14f, arraySchema, false, exception},
+        {map, map, mapSchema, true, zero},
+        {map, 3.14f, unionSchema, false, exception},
+        {new GenericData.Fixed(fixedSchema), new GenericData.Fixed(fixedSchema), fixedSchema, true, zero},
+      });
+    }
+
+    private final Object o1;
+    private final Object o2;
+    private final Schema s;
+    private final boolean equals;
+    private final ExpectedResult<Integer> expected;
+
+    public TestCompare(Object o1, Object o2, Schema s, boolean equals, ExpectedResult<Integer> expected) {
+      this.o1 = o1;
+      this.o2 = o2;
+      this.s = s;
+      this.equals = equals;
+      this.expected = expected;
+    }
+
+    @Test
+    public void compareTest() {
+      try {
+        Integer result = GenericData.get().compare(o1, o2, s, equals);
         Assert.assertEquals(expected.getResult(), result);
       } catch (Exception ignored) {
         Assert.assertNotNull(expected.getException());
