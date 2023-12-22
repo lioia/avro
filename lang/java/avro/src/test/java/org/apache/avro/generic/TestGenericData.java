@@ -4,6 +4,7 @@ import net.bytebuddy.description.type.TypeList;
 import org.apache.avro.Conversions;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
+import org.apache.avro.util.Utf8;
 import org.apache.avro.utils.ExpectedResult;
 import org.junit.Assert;
 import org.junit.Before;
@@ -260,27 +261,34 @@ public class TestGenericData {
     }
   }
 
-//  com(true),eq(true),BooleanSchema,true, 0
-//  inc(int 3),ne(float 3.14),RecordSchema,false, exception
-//  com("a"),eq("a"),EnumSchema,true, 0
-//  inc(int 3),ne(float 3.14),ArraySchema,false, exception
-//  com(Map with "key": "value"),eq(Map with "key": "value"),MapSchema,true, 0
-//  inc(map),ne(float 3.14),UnionSchema,false, exception
-//  com(Fixed(3)),eq(Fixed(3)),FixedSchema,true, 0
-
   @RunWith(Parameterized.class)
   public static class TestCompare {
     @Parameterized.Parameters
     public static Collection<Object[]> getParameters() {
-      Schema recordSchema = Schema.createRecord("Record1", null, null, false, Collections.singletonList(new Schema.Field("a", Schema.create(Schema.Type.INT))));
+      Schema recordSchema = Schema.createRecord("Record1", null, null, false, Arrays.asList(
+        new Schema.Field("a", Schema.create(Schema.Type.INT), null, 0, Schema.Field.Order.IGNORE),
+        new Schema.Field("b", Schema.create(Schema.Type.FLOAT), null, 3.14f, Schema.Field.Order.DESCENDING)
+      ));
+      Schema recordSchema2 = Schema.createRecord("Record2", null, null, false, Collections.singletonList(
+        new Schema.Field("a", Schema.create(Schema.Type.INT), null, 0, Schema.Field.Order.ASCENDING)
+      ));
       Schema enumSchema = Schema.createEnum("Enum1", null, null, Arrays.asList("a", "b"));
       Schema arraySchema = Schema.createArray(Schema.create(Schema.Type.INT));
       Schema mapSchema = Schema.createMap(Schema.create(Schema.Type.INT));
       Schema unionSchema = Schema.createUnion(Schema.create(Schema.Type.INT), Schema.create(Schema.Type.STRING));
       Schema fixedSchema = Schema.createFixed("Fixed1", null, null, 16);
-      Map<String, Integer> map = new HashMap<>();
-      map.put("key", 0);
+      Map<String, Integer> map1 = new HashMap<>();
+      map1.put("key", 0);
+      Map<String, Integer> map2 = new HashMap<>();
+      map2.put("key", 1);
+      GenericData.Record record1 = new GenericRecordBuilder(recordSchema).build();
+      GenericData.Record record2 = new GenericRecordBuilder(recordSchema).set("a", 3).set("b", 6.28f).build();
+      GenericData.Record record3 = new GenericRecordBuilder(recordSchema).set("a", 0).set("b", 3.14f).build();
+      GenericData.Record record4 = new GenericRecordBuilder(recordSchema2).build();
+      GenericData.Record record5 = new GenericRecordBuilder(recordSchema2).set("a", 3).build();
       ExpectedResult<Integer> zero = new ExpectedResult<>(0, null);
+      ExpectedResult<Integer> minus1 = new ExpectedResult<>(-1, null);
+      ExpectedResult<Integer> one = new ExpectedResult<>(1, null);
       ExpectedResult<Integer> exception = new ExpectedResult<>(null, Exception.class);
       return Arrays.asList(new Object[][]{
 //        {null, null, null, true, exception}, // Fail: shouldn't work with invalid schema
@@ -295,9 +303,25 @@ public class TestGenericData {
         {3, 3.14f, recordSchema, false, exception},
         {new GenericData.EnumSymbol(enumSchema, "a"), new GenericData.EnumSymbol(enumSchema, "a"), enumSchema, true, zero},
         {3, 3.14f, arraySchema, false, exception},
-        {map, map, mapSchema, true, zero},
-        {map, 3.14f, unionSchema, false, exception},
+        {map1, map1, mapSchema, true, zero},
+        {map1, 3.14f, unionSchema, false, exception},
         {new GenericData.Fixed(fixedSchema), new GenericData.Fixed(fixedSchema), fixedSchema, true, zero},
+        // Improvements
+        {3, null, Schema.create(Schema.Type.NULL), true, zero},
+        {"generic", "generic1", Schema.create(Schema.Type.STRING), true, minus1},
+        {Arrays.asList(1, 2), Arrays.asList(3, 4), arraySchema, true, minus1},
+        {map1, map2, mapSchema, true, one},
+        {"generic", 3, unionSchema, true, one},
+        {new Utf8("generic"), new Utf8("generic1"), Schema.create(Schema.Type.STRING), true, minus1},
+        {"generic", "generic1", unionSchema, true, minus1},
+        {map1, map2, mapSchema, false, exception},
+        {Arrays.asList(1, 1), Collections.singletonList(1), arraySchema, true, one},
+        {Collections.singletonList(1), Arrays.asList(1, 1), arraySchema, true, minus1},
+        {Collections.singletonList(1), Collections.singletonList(1), arraySchema, true, zero},
+        {record1, record2, recordSchema, true, one},
+        {record2, record1, recordSchema, true, minus1},
+        {record1, record3, recordSchema, true, zero},
+        {record4, record5, recordSchema2, true, minus1},
       });
     }
 
