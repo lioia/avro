@@ -16,18 +16,26 @@ public class TestSchemaCompatibility {
     Schema.Field aField = new Schema.Field("a", Schema.create(Schema.Type.INT));
     Schema.Field bField = new Schema.Field("b", Schema.create(Schema.Type.FLOAT));
     Schema.Field cField = new Schema.Field("c", Schema.create(Schema.Type.INT));
-//    Schema.Field dField = new Schema.Field("d", Schema.create(Schema.Type.INT));
-//    dField.addAlias("a");
+    Schema.Field dField = new Schema.Field("d", Schema.create(Schema.Type.INT));
+    dField.addAlias("a");
+    Schema.Field eField = new Schema.Field("e", Schema.create(Schema.Type.INT));
+    eField.addAlias("c");
+    Schema.Field fField = new Schema.Field("f", Schema.create(Schema.Type.INT));
+    fField.addAlias("a");
+    fField.addAlias("b");
     Schema record1 = Schema.createRecord("Record1", null, null, false, Arrays.asList(aField, bField));
 
-//    ExpectedResult<Schema.Field> nullResult = new ExpectedResult<>(null, null);
+    ExpectedResult<Schema.Field> nullResult = new ExpectedResult<>(null, null);
     ExpectedResult<Schema.Field> exception = new ExpectedResult<>(null, Exception.class);
     return Arrays.asList(new Object[][]{
       {null, null, exception},
       {Schema.create(Schema.Type.INT), cField, exception},
       {record1, aField, new ExpectedResult<>(aField, null)},
-//      // Improvements
-//      {record1, cField, nullResult},
+      // Improvements
+      {record1, cField, nullResult},
+      {record1, dField, new ExpectedResult<>(aField, null)},
+      {record1, eField, nullResult},
+      {record1, fField, exception},
     });
   }
 
