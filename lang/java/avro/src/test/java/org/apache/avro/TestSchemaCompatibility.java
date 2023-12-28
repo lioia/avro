@@ -75,6 +75,7 @@ public class TestSchemaCompatibility {
       Schema array1 = Schema.createArray(Schema.create(Schema.Type.INT));
       Schema map1 = Schema.createMap(Schema.create(Schema.Type.INT));
       Schema union1 = Schema.createUnion(Schema.create(Schema.Type.INT), Schema.create(Schema.Type.STRING));
+      Schema union2 = Schema.createUnion(Schema.create(Schema.Type.FLOAT), Schema.create(Schema.Type.BOOLEAN));
       Schema fixed1 = Schema.createFixed("Fixed1", null, null, 16);
       ExpectedResult<SchemaCompatibility.SchemaCompatibilityType> compatible = new ExpectedResult<>(SchemaCompatibility.SchemaCompatibilityType.COMPATIBLE, null);
       ExpectedResult<SchemaCompatibility.SchemaCompatibilityType> incompatible = new ExpectedResult<>(SchemaCompatibility.SchemaCompatibilityType.INCOMPATIBLE, null);
@@ -95,6 +96,26 @@ public class TestSchemaCompatibility {
         {map1, Schema.create(Schema.Type.INT), incompatible},
         {union1, union1, compatible},
         {fixed1, Schema.create(Schema.Type.INT), incompatible},
+        // Improvements
+        {map1, map1, compatible},
+        {fixed1, fixed1, compatible},
+        {enum1, enum1, compatible},
+        {union1, union2, incompatible},
+        {Schema.create(Schema.Type.NULL), Schema.create(Schema.Type.INT), incompatible},
+        {Schema.create(Schema.Type.LONG), Schema.create(Schema.Type.FLOAT), incompatible},
+        {Schema.create(Schema.Type.DOUBLE), Schema.create(Schema.Type.FLOAT), compatible},
+        {Schema.create(Schema.Type.BYTES), Schema.create(Schema.Type.FLOAT), incompatible},
+        {array1, Schema.create(Schema.Type.FLOAT), incompatible},
+        {record1, Schema.create(Schema.Type.FLOAT), incompatible},
+        {Schema.create(Schema.Type.INT), union1, incompatible},
+        {Schema.create(Schema.Type.LONG), Schema.create(Schema.Type.INT), compatible},
+        {Schema.create(Schema.Type.FLOAT), Schema.create(Schema.Type.INT), compatible},
+        {Schema.create(Schema.Type.FLOAT), Schema.create(Schema.Type.LONG), compatible},
+        {Schema.create(Schema.Type.DOUBLE), Schema.create(Schema.Type.INT), compatible},
+        {Schema.create(Schema.Type.DOUBLE), Schema.create(Schema.Type.LONG), compatible},
+        {Schema.create(Schema.Type.DOUBLE), Schema.create(Schema.Type.STRING), incompatible},
+        {Schema.create(Schema.Type.BYTES), Schema.create(Schema.Type.STRING), compatible},
+        {Schema.create(Schema.Type.STRING), Schema.create(Schema.Type.BYTES), compatible},
       });
     }
 
