@@ -366,6 +366,7 @@
             <configuration>
               <targetClasses>
                 <param>org.apache.avro.SchemaCompatibility</param>
+                <param>org.apache.avro.SchemaCompatibility$ReaderWriterCompatibilityChecker</param>
               </targetClasses>
               <targetTests>
                 <param>org.apache.avro.TestSchemaCompatibility</param>
