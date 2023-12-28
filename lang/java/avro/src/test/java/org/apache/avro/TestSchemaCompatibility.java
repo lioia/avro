@@ -96,7 +96,7 @@ public class TestSchemaCompatibility {
         {map1, Schema.create(Schema.Type.INT), incompatible},
         {union1, union1, compatible},
         {fixed1, Schema.create(Schema.Type.INT), incompatible},
-        // Improvements
+        // JaCoCo Improvements
         {map1, map1, compatible},
         {fixed1, fixed1, compatible},
         {enum1, enum1, compatible},
@@ -116,6 +116,8 @@ public class TestSchemaCompatibility {
         {Schema.create(Schema.Type.DOUBLE), Schema.create(Schema.Type.STRING), incompatible},
         {Schema.create(Schema.Type.BYTES), Schema.create(Schema.Type.STRING), compatible},
         {Schema.create(Schema.Type.STRING), Schema.create(Schema.Type.BYTES), compatible},
+        // ba-dua improvements
+        {record1, Schema.createUnion(), compatible},
       });
     }
 
