@@ -365,11 +365,13 @@
             <version>${pitest.version}</version>
             <configuration>
               <targetClasses>
+                <param>org.apache.avro.generic.GenericData</param>
                 <param>org.apache.avro.SchemaCompatibility</param>
                 <param>org.apache.avro.SchemaCompatibility$ReaderWriterCompatibilityChecker</param>
                 <param>org.apache.avro.Schema</param>
               </targetClasses>
               <targetTests>
+                <param>org.apache.avro.generic.TestGenericData</param>
                 <param>org.apache.avro.TestSchemaCompatibility</param>
                 <param>org.apache.avro.TestSchema</param>
               </targetTests>
